@@ -40,6 +40,7 @@
  */
 
 #include "pngpriv.h"
+#include <math.h>
 
 #if defined(PNG_READ_SUPPORTED) || defined(PNG_WRITE_SUPPORTED)
 
