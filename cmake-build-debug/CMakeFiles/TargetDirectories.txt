@@ -1,0 +1,3 @@
+/Users/user/Desktop/Projects/toys/JVM/jdk/cmake-build-debug/CMakeFiles/jdk.dir
+/Users/user/Desktop/Projects/toys/JVM/jdk/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/user/Desktop/Projects/toys/JVM/jdk/cmake-build-debug/CMakeFiles/rebuild_cache.dir
