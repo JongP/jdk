@@ -30,6 +30,7 @@
 #include "oops/oopsHierarchy.hpp"
 #include "runtime/globals.hpp"
 
+//마크워드 레이아웃에 대한 설명
 // The markWord describes the header of an object.
 //
 // Bit-format of an object header (most significant first, big endian layout below):

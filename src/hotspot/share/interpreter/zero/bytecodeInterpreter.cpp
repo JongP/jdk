@@ -1848,44 +1848,49 @@ run:
           UPDATE_PC_AND_TOS_AND_CONTINUE(3, count);
         }
 
+
+    //new로 객체 생성하는 부분!
       CASE(_new): {
         u2 index = Bytes::get_Java_u2(pc+1);
 
         // Attempt TLAB allocation first.
         //
         // To do this, we need to make sure:
-        //   - klass is initialized
-        //   - klass can be fastpath allocated (e.g. does not have finalizer)
-        //   - TLAB accepts the allocation
+        //   - klass is initialized (클래스 초기화 완료)
+        //   - klass can be fastpath allocated (e.g. does not have finalizer) 빠른 경로 할당이 가능한 클래스
+        //   - TLAB accepts the allocation w
         ConstantPool* constants = istate->method()->constants();
         if (UseTLAB && !constants->tag_at(index).is_unresolved_klass()) {
           Klass* entry = constants->resolved_klass_at(index);
           InstanceKlass* ik = InstanceKlass::cast(entry);
           if (ik->is_initialized() && ik->can_be_fastpath_allocated()) {
             size_t obj_size = ik->size_helper();
+            //TLAB에 메모리 할당 시도
             HeapWord* result = THREAD->tlab().allocate(obj_size);
-            if (result != NULL) {
+            if (result != NULL) { //할당 성공
               // Initialize object field block:
               //   - if TLAB is pre-zeroed, we can skip this path
               //   - in debug mode, ThreadLocalAllocBuffer::allocate mangles
               //     this area, and we still need to initialize it
               if (DEBUG_ONLY(true ||) !ZeroTLAB) {
                 size_t hdr_size = oopDesc::header_size();
-                Copy::fill_to_words(result + hdr_size, obj_size - hdr_size, 0);
+                Copy::fill_to_words(result + hdr_size, obj_size - hdr_size, 0); //0으로 초기화. (필드 초기화 안했을 때 값이 0이되는 이유)
               }
 
+              //일반 객체 포인터로 형 변환
               oop obj = cast_to_oop(result);
 
               // Initialize header
               assert(!UseBiasedLocking, "Not implemented");
-              obj->set_mark(markWord::prototype());
+              obj->set_mark(markWord::prototype());  //마크 워드 설정
               obj->set_klass_gap(0);
-              obj->set_klass(ik);
+              obj->set_klass(ik);  //클래스 워드 설정
 
               // Must prevent reordering of stores for object initialization
               // with stores that publish the new object.
               OrderAccess::storestore();
               SET_STACK_OBJECT(obj, 0);
+              //다음 명령어로 진행
               UPDATE_PC_AND_TOS_AND_CONTINUE(3, 1);
             }
           }
